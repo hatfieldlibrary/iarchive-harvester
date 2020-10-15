@@ -12,7 +12,7 @@ const jsonFile = "theses-data.json"
 const outputDirectory = "/Users/michaelspalti/willamette/cst/cst_harvest_test"
 
 func convertToJsonFile(input string, jsonFile string) {
-	_, err := filereader.FileReader(input, jsonFile)
+	_, err := filereader.InputFileConverter(input, jsonFile)
 	if (err != nil) {
 		log.Fatal(err)
 	}

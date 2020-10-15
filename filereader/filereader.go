@@ -9,7 +9,11 @@ import (
 	"theses/types"
 )
 
-func FileReader(input string, output string) (string, error) {
+/*
+InputFileConverter extracts information from the tag-delimited input file and creates a json output
+file that can be used in harvesting.
+*/
+func InputFileConverter(input string, output string) (string, error) {
 
 	if (input == "") {
 		return "", errors.New("no input file name")
