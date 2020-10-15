@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/cst_theses.iml" filepath="$PROJECT_DIR$/cst_theses.iml" />
+      <module fileurl="file://$PROJECT_DIR$/types/types.iml" filepath="$PROJECT_DIR$/types/types.iml" />
+      <module fileurl="file://$PROJECT_DIR$/filereader/filereader.iml" filepath="$PROJECT_DIR$/filereader/filereader.iml" />
+      <module fileurl="file://$PROJECT_DIR$/harvest/harvester.iml" filepath="$PROJECT_DIR$/harvest/harvester.iml" />
+    </modules>
+  </component>
+</project>
