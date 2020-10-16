@@ -31,6 +31,9 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
+	if apiKey == "" {
+		fmt.Println("the api key field is an empty string, harvesting Internet Archive records only")
+	}
 	harvestResult, err := harvest.HarvestData(jsonFile, outputDirectory, apiKey)
 	if (err != nil) {
 		log.Fatal(err)

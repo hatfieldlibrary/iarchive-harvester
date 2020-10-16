@@ -15,11 +15,11 @@ ReadApiKey returns the key set in the json configuration file. This file is desc
  */
 func ReadApiKey(input string) (string, error) {
 	if (input == "") {
-		return "", errors.New("no input file name")
+		return "", errors.New("no api configuration file name, harvesting Internet Archive records only")
 	}
 	dat, err := ioutil.ReadFile(input)
 	if (err != nil) {
-		return "", errors.New(fmt.Sprintf("unable to open api key file: %v", input))
+		return "", errors.New(fmt.Sprintf("unable to open api key file %v, harvesting Internet Archive records only", input))
 	}
 	key := types.ApiKey{}
 	_ = json.Unmarshal([]byte(dat), &key)
