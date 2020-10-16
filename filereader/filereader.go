@@ -1,13 +1,30 @@
 package filereader
 
 import (
-	"errors"
-	"fmt"
-	"os"
 	"encoding/csv"
 	"encoding/json"
+	"errors"
+	"fmt"
+	"io/ioutil"
+	"os"
 	"theses/types"
 )
+
+/*
+ReadApiKey returns the key set in the json configuration file. This file is described in README.
+ */
+func ReadApiKey(input string) (string, error) {
+	if (input == "") {
+		return "", errors.New("no input file name")
+	}
+	dat, err := ioutil.ReadFile(input)
+	if (err != nil) {
+		return "", errors.New(fmt.Sprintf("unable to open api key file: %v", input))
+	}
+	key := types.ApiKey{}
+	_ = json.Unmarshal([]byte(dat), &key)
+	return key.Key, nil
+}
 
 /*
 InputFileConverter extracts information from the tag-delimited input file and creates a json output

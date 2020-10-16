@@ -1,5 +1,9 @@
 package types
 
+type ApiKey struct {
+	Comment string
+	Key string
+}
 type Thesis struct {
 	Title string
 	IarchiveID string

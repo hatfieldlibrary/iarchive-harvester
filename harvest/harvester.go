@@ -18,7 +18,8 @@ const iArchiveOutputFile = "iarchive.json"
 const worldCatOutputFile = "worldcat.xml"
 const iArchiveType = "iArchiveFile"
 const worldcatType = "worldcat"
-const wskey = "xxxx"
+// et worldcat api key.
+const wskey = ""
 
 func createDirectory(directory string) {
 	_, err := os.Stat(directory)
@@ -150,16 +151,22 @@ func getData(url string, wg *sync.WaitGroup) (io.ReadCloser, error) {
 /*
 downloadDataSources iterates over data sources, fetches data via http, and writes output.
  */
-func downloadDataSources(outputdirectory string, sources []types.DataSource) {
+func downloadDataSources(outputdirectory string, sources []types.DataSource, wskey string) {
 	var wg sync.WaitGroup
 	for _, each := range sources {
 		if each.Source == worldcatType {
-			// wg.Add(1)
-			// url := createWorldCatMetadataUrl(each.OclcNumber)
-			// resp, err := getData(url, &wg)
-			// body := getResponseBody(resp)
-			// createOutputSubDirectory(outputdirectory, each.OclcNumber)
-			// writeFile(outputdirectory + "/" + each.OclcNumber, worldCatOutputFile, body)
+			// non-empty worldcat api key required.
+			if wskey != "" {
+				wg.Add(1)
+				url := createWorldCatMetadataUrl(each.OclcNumber)
+				resp, err := getData(url, &wg)
+				if err != nil {
+					log.Fatal(err)
+				}
+				body := getResponseBody(resp)
+				createOutputSubDirectory(outputdirectory, each.OclcNumber)
+				writeFile(outputdirectory+"/"+each.OclcNumber, worldCatOutputFile, body)
+			}
 		}
 		if each.Source == iArchiveType {
 			wg.Add(1)
@@ -181,7 +188,7 @@ HarvestData exported function retrieves metadata and binary files from the Inter
 Input data is a tab-delimited text file.  Output is written to subdirectories containing a json file for IArchive data,
 a marcxml file for worldcat data, and binary files.
  */
-func HarvestData(input string, outputdirectory string) (string, error) {
+func HarvestData(input string, outputdirectory string, apiKey string) (string, error) {
 	if input == "" {
 		return "", errors.New("no input file name")
 	}
@@ -193,7 +200,7 @@ func HarvestData(input string, outputdirectory string) (string, error) {
 	for _, each := range theses {
 		createDirectory(outputdirectory + "/" + each.Oclc)
 		dataSources := getIarchiveMetadata(each.IarchiveID, each.Oclc, outputdirectory)
-		downloadDataSources(outputdirectory, dataSources)
+		downloadDataSources(outputdirectory, dataSources, apiKey)
 	}
 	message := fmt.Sprintf("Data harvested and written to output directory: %v", string(outputdirectory))
 	return message, nil
