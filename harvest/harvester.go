@@ -18,8 +18,6 @@ const iArchiveOutputFile = "iarchive.json"
 const worldCatOutputFile = "worldcat.xml"
 const iArchiveType = "iArchiveFile"
 const worldcatType = "worldcat"
-// et worldcat api key.
-const wskey = ""
 
 func createDirectory(directory string) {
 	_, err := os.Stat(directory)
@@ -61,7 +59,7 @@ func createIArchiveFileUrl(iarchiveID string, name string) string {
 	return url
 }
 
-func createWorldCatMetadataUrl(accession string) string {
+func createWorldCatMetadataUrl(accession string, wskey string) string {
 	return "http://www.worldcat.org/webservices/catalog/content/" + accession + "?wskey=" + wskey
 }
 
@@ -158,7 +156,7 @@ func downloadDataSources(outputdirectory string, sources []types.DataSource, wsk
 			// non-empty worldcat api key required.
 			if wskey != "" {
 				wg.Add(1)
-				url := createWorldCatMetadataUrl(each.OclcNumber)
+				url := createWorldCatMetadataUrl(each.OclcNumber, wskey)
 				resp, err := getData(url, &wg)
 				if err != nil {
 					log.Fatal(err)
