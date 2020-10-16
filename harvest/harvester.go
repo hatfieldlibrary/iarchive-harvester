@@ -130,6 +130,10 @@ func readIAJsonResponse(iarchiveID string, oclcNumber string, body []byte) []typ
 			source := types.DataSource{File: file["name"].(string), OclcNumber: oclcNumber, Source: iArchiveType, BaseUrl: iarchiveID}
 			dataSourceArray = append(dataSourceArray, source)
 		}
+		if file["format"] == "DjVuTXT" {
+			source := types.DataSource{File: file["name"].(string), OclcNumber: oclcNumber, Source: iArchiveType, BaseUrl: iarchiveID}
+			dataSourceArray = append(dataSourceArray, source)
+		}
 	}
 	return dataSourceArray
 }
