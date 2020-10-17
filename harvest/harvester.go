@@ -147,8 +147,7 @@ func downloadDataSources(outputdirectory string, sources []types.DataSource, wsk
 	for _, each := range sources {
 		if each.Source == worldcatType {
 			// non-empty worldcat api key required.
-			if wskey != "" {
-				fmt.Println(each.OclcNumber)
+			if wskey != "" && len(each.OclcNumber) > 4 {
 				wg.Add(1)
 				url := createWorldCatMetadataUrl(each.OclcNumber, wskey)
 				resp, err := getData(url, &wg)
