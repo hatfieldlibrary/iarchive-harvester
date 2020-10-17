@@ -4,14 +4,14 @@ type ApiKey struct {
 	Comment string
 	Key string
 }
-type Thesis struct {
+type Record struct {
 	Title string
 	IarchiveID string
 	Oclc string
 }
 
 type InputData struct {
-	Data[]Thesis
+	Data[]Record
 }
 
 type DataSource struct {
@@ -30,4 +30,10 @@ type IArchiveFileFormat struct {
 	Crc32 string
 	Sha1 string
 	Format string
+}
+
+type Audit struct {
+	Title string
+	IArchiveID string
+	OCLCNumber string
 }

@@ -52,14 +52,15 @@ func InputFileConverter(input string, output string) (string, error) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	var oneRecord types.Thesis
-	var allRecords []types.Thesis
+	var oneRecord types.Record
+	var allRecords []types.Record
 	for _, each := range csvData {
 		oneRecord.Title = each[0]
 		oneRecord.IarchiveID = each[9]
 		oneRecord.Oclc = each[24]
 		allRecords = append(allRecords, oneRecord)
 	}
+	fmt.Println("Processing %v records.", len(allRecords))
 	jsondata, err := json.Marshal(allRecords) // convert to JSON
 	if err != nil {
 		fmt.Println("error marshalling records")

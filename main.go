@@ -7,14 +7,14 @@ import (
 	"theses/harvest"
 )
 
-// A tab-delimited file.
-const input = "../test_cst_file.txt"
-// This json file will be created at runtime.
+// tab-delimited input file.
+const inputFile = "../cst_theses.txt"
+// json file created at runtime and used by the harvester.
 const jsonFile = "theses-data.json"
-// Create this file to load worldcat data (See README)
+// config file that provides the worldcat api key (See README).
 const apikeyfile = "wskey.json"
-// Set the the output directory here.
-const outputDirectory = "/Users/michaelspalti/willamette/cst/cst_harvest_test"
+// the output directory.
+const outputDirectory = "/Users/michaelspalti/willamette/cst/cst_thesis_harvest"
 
 func convertToJsonFile(input string, jsonFile string) {
 	_, err := filereader.InputFileConverter(input, jsonFile)
@@ -26,7 +26,7 @@ func convertToJsonFile(input string, jsonFile string) {
 func main() {
 	log.SetPrefix("harvester: ")
 	log.SetFlags(0)
-	convertToJsonFile(input, jsonFile)
+	convertToJsonFile(inputFile, jsonFile)
 	apiKey, err := filereader.ReadApiKey(apikeyfile)
 	if err != nil {
 		fmt.Println(err)
