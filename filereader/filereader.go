@@ -14,6 +14,13 @@ import (
 )
 
 /*
+Columns in tab-delimited file.
+ */
+const titleColumn = 0
+const iarchiveColumn = 9
+const oclcColumn = 24
+
+/*
 ReadApiKey returns the key set in the json configuration file. This file is described in README.
  */
 func ReadApiKey(input string) (string, error) {
@@ -109,9 +116,9 @@ func InputFileConverter(input string, output string) (string, error) {
 	var oneRecord types.Record
 	var allRecords []types.Record
 	for _, each := range csvData {
-		oneRecord.Title = each[0]
-		oneRecord.IarchiveID = each[9]
-		oneRecord.Oclc = each[24]
+		oneRecord.Title = each[titleColumn]
+		oneRecord.IarchiveID = each[iarchiveColumn]
+		oneRecord.Oclc = each[oclcColumn]
 		allRecords = append(allRecords, oneRecord)
 	}
 	start := fmt.Sprintf("Processing %v records.", len(allRecords))
