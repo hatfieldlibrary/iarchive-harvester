@@ -17,7 +17,7 @@ Worldcat records are not harvested if the file is missing, or the key is an empt
 
 Writes output to subdirectories. Each directory contains a PDF, a full-text file, and separate files for Internet Archive and Worldcat metadata.
 
-Output also includes an audit file.
+Output also includes an audit file and optional tab-delimited output (default).
 
 ## Input File
 
