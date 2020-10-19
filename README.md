@@ -18,3 +18,14 @@ Worldcat records are not harvested if the file is missing, or the key is an empt
 Writes output to subdirectories. Each directory contains a PDF, a full-text file, and separate files for Internet Archive and Worldcat metadata.
 
 Output also includes an audit file.
+
+## Input File
+
+Takes a tab-delimited file as input.  Required fields are title, Internet Archive ID, and OCLC number.
+
+The Internet Archive title is usually incomplete so this program logs the title provided in the tab-delimited
+input. If the title is unavailable, modify the program to log the Internet Archive title instead.
+
+The program retrieves complete metadata via the WorldCat search API. This is optional. To harvest 
+WorldCat metadata, provide a WorldCat Search API key as described earlier, and include the OCLC number in 
+ your input. 
