@@ -21,7 +21,7 @@ Output also includes an audit file.
 
 ## Input File
 
-Takes a tab-delimited file as input.  Required fields are title, Internet Archive ID, and OCLC number.
+Required fields are title, Internet Archive ID, and OCLC number.
 
 The Internet Archive title is usually incomplete so this program logs the title provided in the tab-delimited
 input. If the title is unavailable, modify the program to log the Internet Archive title instead.
