@@ -11,14 +11,17 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"theses/filereader"
 	"theses/types"
 )
 
+// if createCSV is true, a tab-delimited version of the log file is created in addition to json
+const createCSV = true
 const iArchiveOutputFile = "iarchive.json"
 const worldCatOutputFile = "worldcat.xml"
 const iArchiveType = "iArchiveFile"
 const worldcatType = "worldcat"
-const auditFile = "../audit.json"
+const auditFileLocation = "../audit.log"
 
 func createDirectory(directory string) {
 	_, err := os.Stat(directory)
@@ -80,7 +83,8 @@ func getResponseBody(response io.ReadCloser) []byte {
 getIarchiveMetadata fetches IArchive metadata for single item via GET request, writes the response body to
 the output, and initializes the data source for later use. Logs http errors.
  */
-func getIarchiveMetadata(iarchiveID string, oclcNumber string, outputdirectory string) []types.DataSource {
+func getIarchiveMetadata(title, iarchiveID string, oclcNumber string, outputdirectory string, auditFile *os.File,
+	directory string) []types.DataSource {
 	url := strings.Replace(iarchiveID, "details", "metadata", 1)
 	resp, err := http.Get(url)
 	if err != nil {
@@ -88,15 +92,16 @@ func getIarchiveMetadata(iarchiveID string, oclcNumber string, outputdirectory s
 	}
 	body := getResponseBody(resp.Body)
 	writeFile(outputdirectory, iArchiveOutputFile, body)
-	var dataSources = setDataSources(oclcNumber, iarchiveID, body)
+	var dataSources = setDataSources(title, oclcNumber, iarchiveID, body, auditFile, directory)
 	return dataSources
 }
 
 /*
 setDataSources appends information for IArchive and OCLC data sources to data sources array.
  */
-func setDataSources(oclcNumber string, iarchiveID string, body []byte) []types.DataSource {
-	iArchiveSourceFiles := readIAJsonResponse(iarchiveID, oclcNumber, body)
+func setDataSources(title, oclcNumber string, iarchiveID string, body []byte, auditFile *os.File,
+	directory string) []types.DataSource {
+	iArchiveSourceFiles := readIAJsonResponse(title, iarchiveID, oclcNumber, body, auditFile, directory)
 	oclcSource := types.DataSource{File: oclcNumber, OclcNumber: oclcNumber, Source: worldcatType}
 	iArchiveSourceFiles = append(iArchiveSourceFiles, oclcSource)
 	return iArchiveSourceFiles
@@ -105,22 +110,32 @@ func setDataSources(oclcNumber string, iarchiveID string, body []byte) []types.D
 /*
 readIAJsonResponse adds file information extracted from the IArchive json response to the data sources array.
  */
-func readIAJsonResponse(iarchiveID string, oclcNumber string, body []byte) []types.DataSource {
+func readIAJsonResponse(title, iarchiveID string, oclcNumber string, body []byte, auditFile *os.File,
+	directory string) []types.DataSource {
 	dataSourceArray := []types.DataSource{}
 	var dat map[string]interface{}
 	if err := json.Unmarshal(body, &dat); err != nil {
 		log.Printf("warning: unable to retrieve metadata for: %v\n", iarchiveID)
 		return dataSourceArray
 	}
+	metadata := dat["metadata"].(map[string]interface{})
+	creator := metadata["creator"].(string)
+	description := metadata["description"].(string)
+	date := metadata["date"].(string)
+	auditEntry := types.Audit{Title: title, Author: creator, Date: date, Description: description,
+		OCLCNumber: oclcNumber, IArchiveID: iarchiveID, OutputDirectory: directory}
+	updateAudit(auditFile, &auditEntry)
 	files := dat["files"].([]interface{})
 	for i := 0; i < len(files); i++ {
 		file := files[i].(map[string]interface{})
 		if file["format"] == "Text PDF" {
-			source := types.DataSource{File: file["name"].(string), OclcNumber: oclcNumber, Source: iArchiveType, BaseUrl: iarchiveID}
+			source := types.DataSource{File: file["name"].(string), OclcNumber: oclcNumber, Source: iArchiveType,
+				BaseUrl: iarchiveID}
 			dataSourceArray = append(dataSourceArray, source)
 		}
 		if file["format"] == "DjVuTXT" {
-			source := types.DataSource{File: file["name"].(string), OclcNumber: oclcNumber, Source: iArchiveType, BaseUrl: iarchiveID}
+			source := types.DataSource{File: file["name"].(string), OclcNumber: oclcNumber, Source: iArchiveType,
+				BaseUrl: iarchiveID}
 			dataSourceArray = append(dataSourceArray, source)
 		}
 	}
@@ -189,9 +204,9 @@ func updateAudit(file *os.File, entry *types.Audit) {
 }
 
 /*
-HarvestData exported function retrieves metadata and binary files from the Internet Archive and additional metadata from Worldcat.
-Input data is a tab-delimited text file.  Output is written to subdirectories containing a json file for IArchive data,
-a marcxml file for worldcat data, and binary files.
+HarvestData exported function retrieves metadata and binary files from the Internet Archive and additional metadata
+from Worldcat. Input data is a tab-delimited text file.  Output is written to subdirectories containing a json file
+for IArchive data, a marcxml file for worldcat data, and binary files.
  */
 func HarvestData(input string, outputdirectory string, apiKey string) (string, error) {
 	if input == "" {
@@ -201,25 +216,29 @@ func HarvestData(input string, outputdirectory string, apiKey string) (string, e
 		return "", errors.New("no output file name")
 	}
 	createDirectory(outputdirectory)
-	theses, _ := readJsonInputFile(input)
+	records, _ := readJsonInputFile(input)
 	count := 1
-	file, err := os.OpenFile(auditFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0775)
+	// create the audit.log file.
+	auditFile, err := os.OpenFile(auditFileLocation, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0775)
 	if err != nil {
 		log.Fatalf("failed opening file: %s", err)
 	}
-	defer file.Close()
-	for _, each := range theses {
-		oclc := each.Oclc
-		ia := each.IarchiveID
+	defer auditFile.Close()
+	for _, each := range records {
 		title := each.Title
-		auditEntry := types.Audit{Title: title, OCLCNumber: oclc, IArchiveID: ia}
-		updateAudit(file, &auditEntry)
 		var subdir = fmt.Sprintf("%05d", count)
 		createDirectory(outputdirectory + "/" + subdir)
-		dataSources := getIarchiveMetadata(each.IarchiveID, each.Oclc, outputdirectory + "/" + subdir)
+		dataSources := getIarchiveMetadata(title, each.IarchiveID, each.Oclc, outputdirectory + "/" + subdir,
+			auditFile, subdir)
 		downloadDataSources(outputdirectory + "/" + subdir, dataSources, apiKey)
 		count++
 
+	}
+	if (createCSV) {
+		filereader.ConvertLogToCsv(auditFileLocation)
+		if (err != nil) {
+			log.Fatal(err)
+		}
 	}
 	message := fmt.Sprintf("Data harvested and written to output directory: %v", string(outputdirectory))
 	return message, nil

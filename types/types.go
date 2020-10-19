@@ -34,6 +34,10 @@ type IArchiveFileFormat struct {
 
 type Audit struct {
 	Title string
+	Author string
+	Date string
+	Description string
 	IArchiveID string
 	OCLCNumber string
+	OutputDirectory string
 }

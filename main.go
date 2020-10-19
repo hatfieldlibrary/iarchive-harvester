@@ -6,7 +6,16 @@ import (
 	"theses/filereader"
 	"theses/harvest"
 )
+/*
+Takes a tab-delimited files as input.  Required fields are title, Internet Archive ID, and OCLC number.
 
+The title field is used in logging output because the title in Internet Archive metadata is usually incomplete.
+If title is unavailable modify the program to log the Internet Archive title instead.
+
+The OCLC number is used to harvest additional metadata from WorldCat. This is optional. To harvest WorldCat metadata,
+you need to provide a WorldCat Search API key. Besides an authoritative title, WorldCat metadata includes
+information that may be worth adding to a digital repository record.
+ */
 // tab-delimited input file.
 const inputFile = "../cst_theses.txt"
 // json file created at runtime and used by the harvester.
@@ -35,8 +44,5 @@ func main() {
 		fmt.Println("the api key field is an empty string, harvesting Internet Archive records only")
 	}
 	harvestResult, err := harvest.HarvestData(jsonFile, outputDirectory, apiKey)
-	if (err != nil) {
-		log.Fatal(err)
-	}
 	fmt.Println(harvestResult)
 }
