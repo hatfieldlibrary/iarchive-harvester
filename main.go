@@ -1,11 +1,4 @@
 package main
-
-import (
-	"fmt"
-	"log"
-	"theses/filereader"
-	"theses/harvest"
-)
 /*
 Takes a tab-delimited files as input.  Required fields are title, Internet Archive ID, and OCLC number.
 
@@ -15,7 +8,13 @@ If title is unavailable modify the program to log the Internet Archive title ins
 The OCLC number is used to harvest additional metadata from WorldCat. This is optional. To harvest WorldCat metadata,
 you need to provide a WorldCat Search API key. Besides an authoritative title, WorldCat metadata includes
 information that may be worth adding to a digital repository record.
- */
+*/
+import (
+	"fmt"
+	"log"
+	"theses/filereader"
+	"theses/harvest"
+)
 // tab-delimited input file.
 const inputFile = "../cst_theses.txt"
 // json file created at runtime and used by the harvester.
