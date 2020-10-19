@@ -29,7 +29,7 @@ func ReadApiKey(input string) (string, error) {
 	}
 	dat, err := ioutil.ReadFile(input)
 	if (err != nil) {
-		return "", errors.New(fmt.Sprintf("unable to open api key file %v, harvesting Internet Archive records " +
+		return "", errors.New(fmt.Sprintf("unable to open api key file %s, harvesting Internet Archive records " +
 			"only", input))
 	}
 	key := types.ApiKey{}

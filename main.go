@@ -38,6 +38,9 @@ func main() {
 	apiKey, err := filereader.ReadApiKey(apikeyfile)
 	if err != nil {
 		fmt.Println(err)
+		noKey := fmt.Sprintf("WARNING: If this is not what you want, stop program and create the %s file. ",
+			apikeyfile)
+		fmt.Println(noKey)
 	}
 	if apiKey == "" {
 		fmt.Println("the api key field is an empty string, harvesting Internet Archive records only")
