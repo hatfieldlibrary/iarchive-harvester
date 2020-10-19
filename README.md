@@ -6,7 +6,6 @@ If a Worldcat Search WSKey is provided, Worldcat metadata will be included in th
 in a configuration file.  Add this file to the project root directory.
 
 File name: "wskey.json"
-Content:
 
     {
         "comment": "Description of the api key",
