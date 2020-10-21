@@ -20,10 +20,6 @@ type harvest struct {
 	inputCsv           string
 	outputDirectory    string
 	apiKey             string
-	iArchiveOutputFile string
-	worldCatOutputFile string
-	iArchiveType       string
-	worldCatType       string
 	auditFile 		   *os.File
 }
 
