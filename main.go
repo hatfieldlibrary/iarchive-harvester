@@ -15,36 +15,36 @@ import (
 	"theses/filereader"
 	"theses/harvest"
 )
-// tab-delimited input file.
-const inputFile = "../cst_theses.txt"
-// json file created at runtime and used by the harvester.
-const jsonFile = "theses-data.json"
+
 // config file that provides the worldcat api key (See README).
 const apikeyfile = "wskey.json"
+// tab-delimited input file.
+const inputFile = "../test_cst_file.txt"
 // the output directory.
-const outputDirectory = "/Users/michaelspalti/willamette/cst/cst_thesis_harvest"
-
-func convertToJsonFile(input string, jsonFile string) {
-	_, err := filereader.InputFileConverter(input, jsonFile)
-	if (err != nil) {
-		log.Fatal(err)
-	}
-}
+const outputDirectory = "/Users/michaelspalti/willamette/cst/iarchive_harvest"
+// set this to false if you don't need a tab-delimited version of the log output.
+const createCsv = true
 
 func main() {
 	log.SetPrefix("harvester: ")
 	log.SetFlags(0)
-	convertToJsonFile(inputFile, jsonFile)
+	// Get WorldCat search api key from configuration.
 	apiKey, err := filereader.ReadApiKey(apikeyfile)
 	if err != nil {
 		fmt.Println(err)
 		noKey := fmt.Sprintf("WARNING: If this is not what you want, stop program and create the %s file. ",
 			apikeyfile)
 		fmt.Println(noKey)
+		apiKey = ""
 	}
 	if apiKey == "" {
 		fmt.Println("the api key field is an empty string, harvesting Internet Archive records only")
 	}
-	harvestResult, err := harvest.HarvestData(jsonFile, outputDirectory, apiKey)
+	// Initialize harvester
+	harvester := harvest.New(inputFile, outputDirectory, apiKey, createCsv)
+	harvestResult, err := harvest.FetchData(harvester)
+	if err != nil {
+		fmt.Println(err)
+	}
 	fmt.Println(harvestResult)
 }

@@ -57,23 +57,26 @@ func writeCsvLine(line []byte, csvFile *os.File) {
 		log.Fatal(err)
 	}
 }
+func CreateCsvLogFileName (logFileName string) string {
+	csvFileName := strings.Replace(logFileName, "log", "csv", 1)
+	return csvFileName
+}
 /*
-Each line in the log file is a json object. For some projects it is useful to have the same information
- in tab-delimited format. Calling ConvertLogToCsv creates a csv file.
+Calling ConvertLogToCsv creates a csv file of log entries. Default log entries are written as JSON.
+For some projects it's also helpful to have this information in a tab-delimited format.
  */
-func ConvertLogToCsv(logFile string) {
-	file, err := os.Open(logFile)
-	if err != nil {
-		log.Fatal(err)
-	}
-	csvFileName := strings.Replace(logFile, "log", "csv", 1)
+func ConvertLogToCsv(logFileName string) {
+	csvFileName := CreateCsvLogFileName(logFileName)
 	csvFile, err1 := os.OpenFile(csvFileName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0775)
 	if err1 != nil {
 		log.Fatal(err1)
 	}
 	defer csvFile.Close()
-	defer file.Close()
-	scanner := bufio.NewScanner(file)
+	logFile, err2 := os.Open(logFileName)
+	if err2 != nil {
+		log.Fatal(err1)
+	}
+	scanner := bufio.NewScanner(logFile)
 	// set generous buffer capacity
 	const maxCapacity = 10*1024
 	buf := make([]byte, maxCapacity)
@@ -85,6 +88,8 @@ func ConvertLogToCsv(logFile string) {
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
+	message := fmt.Sprintf("Created csv file %s", logFileName)
+	fmt.Println(message)
 }
 
 /*
