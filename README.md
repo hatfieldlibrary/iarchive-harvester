@@ -2,8 +2,8 @@
 
 A Go project created to harvest metadata and files from Intenet Archive. Accepts tab-delimited file containing IArchive identifier and OCLC number.
 
-If a Worldcat Search WSKey is provided, Worldcat metadata will be included in the harvested record. The WSKey is defined
-in a configuration file.  Add this file to the project root directory.
+Worldcat metadata is included in the harvested records if a Worldcat Search API WSKey is provided. The WSKey is defined
+in a configuration file that's added to the project root directory.
 
 File name: "wskey.json"
 
@@ -12,19 +12,20 @@ File name: "wskey.json"
         "key": ""
     }
 
-Worldcat records are not harvested if the file is missing, or the key is an empty string.
+If the file is missing, or the key is an empty string, the harvester does not query the WorldCat Search API.
 
-Writes output to subdirectories. Each directory contains a PDF, a full-text file, and separate files for Internet Archive and Worldcat metadata.
+The harvester writes output to subdirectories. Each directory contains a PDF, a full-text file, and separate files 
+for Internet Archive and Worldcat metadata.
 
-Output also includes an audit file and optional tab-delimited logging output (default).
+Output includes an audit file with JSON entries (deault) and optional tab-delimited log output.
 
 ## Input File
 
-Required fields are title, Internet Archive ID, and OCLC number.
+Required fields are in the tab-delimited input file are title, Internet Archive ID, and OCLC number.
 
-The Internet Archive title is usually incomplete so this program logs the title provided in the tab-delimited
-input. If the title is unavailable, modify the program to log the Internet Archive title instead.
+The Internet Archive title is usually incomplete. This program logs the title provided in the tab-delimited
+input. If the title is unavailable then modify the program to log the Internet Archive title instead.
 
-The program retrieves complete metadata via the WorldCat search API. This is optional. To harvest 
-WorldCat metadata, provide a WorldCat Search API key as described earlier, and include the OCLC number in 
- your input. 
+The program can retrieve marcxml metadata via the WorldCat search API. This is optional. To harvest 
+WorldCat metadata, provide the OCLC number in your input file and configure a WorldCat Search API key as described 
+earlier. 
