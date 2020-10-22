@@ -21,7 +21,7 @@ const apikeyfile = "wskey.json"
 // tab-delimited input file.
 const inputFile = "../test_cst_file.txt"
 // the output directory.
-const outputDirectory = "/Users/michaelspalti/willamette/cst/iarchive_harvest"
+const outputDirectory = "../iarchive_harvest"
 // set this to false if you don't need a tab-delimited version of the log output.
 const createCsv = true
 

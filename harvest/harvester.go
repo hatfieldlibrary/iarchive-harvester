@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"sync"
 	"theses/filereader"
 	"theses/types"
 )
@@ -21,6 +20,12 @@ type harvest struct {
 	outputDirectory    string
 	apiKey             string
 	auditFile 		   *os.File
+}
+
+type dataDownload struct {
+	file string
+	response io.ReadCloser
+	error error
 }
 
 const iArchiveOutputFileName = "iarchive.json"
@@ -95,6 +100,7 @@ func getResponseBody(response io.ReadCloser) []byte {
 	if err != nil {
 		log.Fatal(err)
 	}
+	response.Close()
 	return body
 }
 
@@ -151,8 +157,7 @@ func getDataSources(files []interface{}, iarchiveID string, oclcNumber string) [
 /*
 getData executes a single HTTP GET request.
  */
-func getData(url string, wg *sync.WaitGroup) (io.ReadCloser, error) {
-	defer wg.Done()
+func getData(url string) (io.ReadCloser, error) {
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
@@ -165,33 +170,37 @@ downloadDataSources iterates over data sources, fetches via http, and writes to 
 for WorldCat Search API queries.
  */
 func downloadDataSources(sources []types.DataSource, wskey string, outputdirectory string, ) {
-	var wg sync.WaitGroup
+	ch := make(chan *dataDownload, len(sources))
 	for _, each := range sources {
-		if each.Source == worldcatType {
-			// non-empty worldcat api key required.
-			if wskey != "" && len(each.OclcNumber) > 4 {
-				wg.Add(1)
-				url := createWorldCatMetadataUrl(each.OclcNumber, wskey)
-				resp, err := getData(url, &wg)
+		go func(each types.DataSource) {
+			if each.Source == worldcatType {
+				// non-empty worldcat api key required.
+				if wskey != "" && len(each.OclcNumber) > 4 {
+					url := createWorldCatMetadataUrl(each.OclcNumber, wskey)
+					resp, err := getData(url)
+					if err != nil {
+						log.Println(err)
+					}
+					ch <- &dataDownload{worldCatOutputFileName, resp, err}
+				}
+			}
+			if each.Source == iArchiveType {
+				url := createIArchiveFileUrl(each.BaseUrl, each.File)
+				resp, err := getData(url)
 				if err != nil {
 					log.Println(err)
 				}
-				body := getResponseBody(resp)
-				writeFile(outputdirectory, worldCatOutputFileName, body)
+				ch <- &dataDownload{each.File, resp, err}
 			}
-		}
-		if each.Source == iArchiveType {
-			wg.Add(1)
-			url := createIArchiveFileUrl(each.BaseUrl, each.File)
-			resp, err := getData(url, &wg)
-			if err != nil {
-				log.Println(err)
-			}
-			body := getResponseBody(resp)
-			writeFile(outputdirectory, each.File, body)
-		}
+		}(each)
+
 	}
-	wg.Wait()
+	// Read from channels.
+	for range sources {
+		data := <-ch
+		body := getResponseBody(data.response)
+		writeFile(outputdirectory, data.file, body)
+	}
 }
 
 /*
