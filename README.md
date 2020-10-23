@@ -29,3 +29,7 @@ input. If the title is unavailable then modify the program to log the Internet A
 The program can retrieve marcxml metadata via the WorldCat search API. This is optional. To harvest 
 WorldCat metadata, provide the OCLC number in your input file and configure a WorldCat Search API key as described 
 earlier. 
+
+## Output
+For each record, the program creates a subdirectory with 3 files: IArchive metadata, PDF, and full text files. If 
+you provided a `wskey.json`, the directory also includes the WorldCat marcxml record.
